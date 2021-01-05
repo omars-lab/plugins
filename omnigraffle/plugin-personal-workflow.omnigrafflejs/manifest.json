@@ -1,0 +1,22 @@
+{
+    "author": "Omar Eid",
+    "libraries": [
+        {
+            "identifier": "ApplicationLib"
+        }
+    ],
+    "identifier": "com.oeid.OmniGraffle",
+    "version": "1.0",
+    "description": "A collection of Omni Automation scripts intended for OmniGraffle regarding different aspects of my personal workflow.",
+    "actions": [
+        {
+            "image": "icon.png",
+            "identifier": "aboutThisPlugin"
+        },
+        {
+            "image": "icon.png",
+            "identifier": "openRole"
+        }
+    ],
+    "defaultLocale": "en"
+}
