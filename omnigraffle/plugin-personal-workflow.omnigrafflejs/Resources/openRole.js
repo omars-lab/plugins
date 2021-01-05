@@ -17,8 +17,25 @@ var _ = function(){
 	var action = new PlugIn.Action(function(selection){
 		// if called externally (from script) generate selection object
 		if (typeof selection == 'undefined'){selection = document.windows[0].selection}
+
+		// When an action is assinged to a grouped hat, its passed down to the individual elementes which get selected ...
+		// Accordingly, to get the name of the parent container, I need to find the parent that contains the selected item in the same canvas ...
+		parent = null
+		document.windows[0].selection.canvas.graphics.forEach(
+			function (e) {
+				e.graphics.forEach(function (e2) {
+					if (e2.id == selection.graphics[0].id) {
+						parent = e
+					}
+				}) 
+			}
+		)
 		
-		text = selection.graphics[0].name
+		selection = parent
+		text = selection.name
+		// text = selection.graphics[0].name
+		// console.log(selection)
+		// console.log(selection.graphics)
 		// text = JSON.stringify(Object.fromEntries(new Map(Object.keys(selection), Object.values(selection))))
 
 		var loc = encodeURIComponent("/Locations/personalbook/roles/" + text + "/Overview.md")
