@@ -1,0 +1,5 @@
+*.vsix
+tst/*.js
+tst/*.js.map
+out/*
+node_modules/
