@@ -5,5 +5,4 @@
 	- https://marketplace.visualstudio.com/items?itemName=oeid.flavorfultasks
 	- https://marketplace.visualstudio.com/manage/publishers/omars-lab
 	- https://dev.azure.com/omars-lab/_usersSettings/tokens
-
 	- https://vscode-docs.readthedocs.io/en/latest/tools/vscecli/

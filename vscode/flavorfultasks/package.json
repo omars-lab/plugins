@@ -25,12 +25,21 @@
             {
                 "command": "extension.TodoMarkDone",
                 "title": "Todo: Mark as Done"
+            },
+            {
+                "command": "extension.TodoReschedule",
+                "title": "Todo: Reschedule"
             }
         ],
         "keybindings": [
             {
                 "command": "extension.TodoMarkDone",
                 "mac": "shift+cmd+d",
+                "when": "editorTextFocus"
+            },
+            {
+                "command": "extension.TodoReschedule",
+                "mac": "shift+cmd+.",
                 "when": "editorTextFocus"
             }
         ]
