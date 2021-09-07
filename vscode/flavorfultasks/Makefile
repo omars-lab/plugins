@@ -2,6 +2,9 @@ SHELL := /bin/bash
 MAKEFILE_DIR := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 AZURE_TOKEN := $(shell lpass show -j --id 8644053853501480489 | jq -r '.[0].note')
 
+clean:
+	rm -rf "${MAKEFILE_DIR}/node_modules"
+
 setup: 
 	(npm list -g --depth=0 | sed -E 's/(├|└)── //g' | grep -q vsce) || npm install -g vsce
 	test -d ${MAKEFILE_DIR}/node_modules || ( cd ${MAKEFILE_DIR} && npm install ) 
