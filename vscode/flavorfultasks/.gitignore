@@ -1,4 +1,3 @@
-*.vsix
 tst/*.js
 tst/*.js.map
 out/*

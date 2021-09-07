@@ -3,6 +3,7 @@ MAKEFILE_DIR := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 AZURE_TOKEN := $(shell lpass show -j --id 8644053853501480489 | jq -r '.[0].note')
 
 setup: 
+	(npm list -g --depth=0 | sed -E 's/(├|└)── //g' | grep -q vsce) || npm install -g vsce
 	test -d ${MAKEFILE_DIR}/node_modules || ( cd ${MAKEFILE_DIR} && npm install ) 
 
 test:
@@ -11,6 +12,7 @@ test:
 	
 compile: setup
 	cd ${MAKEFILE_DIR} && vsce package
+	mv ${MAKEFILE_DIR}/*.vsix ${MAKEFILE_DIR}/releases/
 
 install: compile
 	find ${MAKEFILE_DIR} -name '*.vsix' | xargs -n 1 code --install-extension
