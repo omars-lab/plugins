@@ -2,3 +2,5 @@ tst/*.js
 tst/*.js.map
 out/*
 node_modules/
+vscode-reinstall-plugins
+vsix-install.out.log

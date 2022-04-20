@@ -6,6 +6,7 @@ import * as moment from 'moment';
 
 const regex_todo = /^\s*[-*] \[ \].*$/;
 const regex_task_done = /^\s*[-*] \[[xX]\].*$/;
+const regex_task_canceled = /^\s*[-*] \[[-]\].*$/;
 // A valid task ... but its not in a todo state ...
 const regex_not_todo = /^\s*[-*] \[[^ ]\].*$/;
 const regex_task = /[-*] \[.\]/;
@@ -13,7 +14,7 @@ const regex_emptyline = /^\s*$/;
 const regex_done = / @done\([^)]+\)/;
 const regex_capturing_preceding_whitespace = /(\s*)(.*)/;
 const regex_has_schedule = / >\d{4}-\d{2}-\d{2}/;
-const regex_capturing_schedule = />(\d{4}-\d{2}-\d{2})(.*)/;
+const regex_capturing_schedule = / >(\d{4}-\d{2}-\d{2})(.*)/;
 
 
 function zeroPad(num:string, places:number):string {
@@ -60,23 +61,29 @@ function done_handler(task:string) : string {
 	if (regex_emptyline.test(task)) {
 		response = `${task}- [ ]`;
 	}
-	else if (regex_todo.test(task)) {
-		const newTask = task.replace("- [ ]", "- [x]").replace("* [ ]", "* [x]");
-		response = `${newTask} @done(${now})`;
-	}
 	else if (regex_task_done.test(task)) {
+		// Undo a done ...
 		const newTask = (
 			task
-				.replace("- [x]", "- [ ]")
-				.replace("- [X]", "- [ ]")
-				.replace("* [x]", "* [ ]")
-				.replace("* [X]", "* [ ]")
+				.replace(regex_task, "- [ ]")
 				.replace(regex_done, '')
 		);
 		response = newTask;
 	}
+	else if (regex_todo.test(task)) {
+		const newTask = (
+			task
+				.replace(regex_task, "- [x]")
+		);
+		response = `${newTask} @done(${now})`;
+	}
 	else if (regex_not_todo.test(task)) {
-		response = `${task.replace(regex_task, "- [x] ").replace(regex_done, `@done(${now})`)}`;
+		response = (
+			task
+				.replace(regex_task, "- [x]")
+				.replace(regex_done, '')
+		);
+		response = `${response} @done(${now})`;
 	}
 	else {
 		response = task.replace(regex_capturing_preceding_whitespace, "$1- [x]$2");
@@ -90,6 +97,21 @@ function create_handler(task:string) : string {
 	if (regex_emptyline.test(task)) {
 		response = `${task}- [ ]`;
 	}
+	else if (regex_not_todo.test(task)) {
+		// Flush non todos into todos ...
+		const newTask = (
+			task
+				.replace(regex_task, "- [ ]")
+				.replace(regex_done, '')
+				// Do a replace all ...
+				.replace(regex_capturing_schedule, '$2')
+				.replace(regex_capturing_schedule, '$2')
+				.replace(regex_capturing_schedule, '$2')
+				.replace(regex_capturing_schedule, '$2')
+				.replace(regex_capturing_schedule, '$2')
+		);
+		response = newTask;
+	}
 	else {
 		response = task;
 	}
@@ -102,12 +124,28 @@ function cancel_handler(task:string) : string {
 	if (regex_emptyline.test(task)) {
 		response = `${task}- [-]`;
 	}
+	else if (regex_task_canceled.test(task)) {
+		// Undo cancel ...
+		const newTask = (
+			task
+				.replace(regex_task, "- [ ]")
+				.replace(regex_done, '')
+		);
+		response = newTask;
+	}
 	else if (regex_todo.test(task)) {
-		const newTask = task.replace("- [ ]", "- [-]").replace("* [ ]", "* [-]");
+		const newTask = (
+			task
+				.replace(regex_task, "- [-]")
+		);
 		response = `${newTask} @done(${now})`;
 	} 
 	else if (regex_not_todo.test(task)) {
-		response = `${task.replace(regex_task, "- [-] ").replace(regex_done, `@done(${now})`)}`;
+		response = (
+			task
+				.replace(regex_task, "- [-]")
+				.replace(regex_done, `@done(${now})`)
+		);
 	}
 	else {
 		response = task;
@@ -129,14 +167,23 @@ function schedule_handler(task:string) : string {
 		const incremented_date = moment(left_most_schedule, "YYYY-MM-DD").add(1, 'days').format("YYYY-MM-DD");
 		response = (
 			task
-				.replace(regex_capturing_schedule, `>${incremented_date} >$1$2`)
+				.replace(regex_capturing_schedule, ` >${incremented_date} >$1$2`)
 				.replace(regex_task, "- [>]")
 				.replace(regex_done, '')
-
 		);
 	} 
+	else if (regex_task.test(task)) {
+		response = (
+			task
+				.replace(regex_task, "- [>]")
+				.replace(regex_done, '')
+		);
+		response = `${response} >${tomorrow}`;
+	}
 	else {
-		response = task.replace(regex_capturing_preceding_whitespace, "$1- [>]$2");
+		response = (
+			task.replace(regex_capturing_preceding_whitespace, "$1- [>]$2")
+		);
 		response = `${response} >${tomorrow}`;	
 	}
 	// What to do if a task is done and I am trying to schedule it? Undone it? ...
