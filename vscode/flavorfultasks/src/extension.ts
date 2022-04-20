@@ -127,10 +127,17 @@ function schedule_handler(task:string) : string {
 	else if (regex_has_schedule.test(task)){
 		const left_most_schedule = (task.match(regex_capturing_schedule) as RegExpMatchArray)[0];
 		const incremented_date = moment(left_most_schedule, "YYYY-MM-DD").add(1, 'days').format("YYYY-MM-DD");
-		response = task.replace(regex_capturing_schedule, `>${incremented_date} >$1$2`);
+		response = (
+			task
+				.replace(regex_capturing_schedule, `>${incremented_date} >$1$2`)
+				.replace(regex_task, "- [>]")
+				.replace(regex_done, '')
+
+		);
 	} 
 	else {
-		response = `${task} >${tomorrow}`;
+		response = task.replace(regex_capturing_preceding_whitespace, "$1- [>]$2");
+		response = `${response} >${tomorrow}`;	
 	}
 	// What to do if a task is done and I am trying to schedule it? Undone it? ...
 	return response;
