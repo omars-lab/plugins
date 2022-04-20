@@ -1,0 +1,8 @@
+SHELL := /bin/bash
+MAKEFILE_DIR := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
+AZURE_TOKEN := $(shell lpass show -j --id 8644053853501480489 | jq -r '.[0].note')
+
+include ./Makefile
+
+publish: compile install
+	@vsce publish -p "${AZURE_TOKEN}"
