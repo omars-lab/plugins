@@ -4,9 +4,11 @@ import internal = require('stream');
 import * as vscode from 'vscode';
 import * as moment from 'moment';
 
-const regex_todo = /^\s*- \[ \].*$/;
-const regex_not_todo = /^\s*- \[[^ ]\].*$/;
-const regex_task = /- \[.\]/;
+const regex_todo = /^\s*[-*] \[ \].*$/;
+const regex_task_done = /^\s*[-*] \[[xX]\].*$/;
+// A valid task ... but its not in a todo state ...
+const regex_not_todo = /^\s*[-*] \[[^ ]\].*$/;
+const regex_task = /[-*] \[.\]/;
 const regex_emptyline = /^\s*$/;
 const regex_done = / @done\([^)]+\)/;
 const regex_capturing_preceding_whitespace = /(\s*)(.*)/;
@@ -45,6 +47,7 @@ function replace_line_at_cursor(line_transformer : (a: string) => string) {
 			editor.edit(editBuilder => {
 				editBuilder.replace(active_line.range, response);
 			});
+			
 		}
 	};
 }
@@ -58,15 +61,56 @@ function done_handler(task:string) : string {
 		response = `${task}- [ ]`;
 	}
 	else if (regex_todo.test(task)) {
-		response = `${task.replace("- [ ]", "- [x]")} @done(${now})`;
-	} 
+		const newTask = task.replace("- [ ]", "- [x]").replace("* [ ]", "* [x]");
+		response = `${newTask} @done(${now})`;
+	}
+	else if (regex_task_done.test(task)) {
+		const newTask = (
+			task
+				.replace("- [x]", "- [ ]")
+				.replace("- [X]", "- [ ]")
+				.replace("* [x]", "* [ ]")
+				.replace("* [X]", "* [ ]")
+				.replace(regex_done, '')
+		);
+		response = newTask;
+	}
 	else if (regex_not_todo.test(task)) {
-		response = `${task.replace(regex_task, "- [ ] ").replace(regex_done, "")}`;
-
+		response = `${task.replace(regex_task, "- [x] ").replace(regex_done, `@done(${now})`)}`;
 	}
 	else {
 		response = task.replace(regex_capturing_preceding_whitespace, "$1- [x]$2");
 		response = `${response} @done(${now})`;	
+	}
+	return response;
+}
+
+function create_handler(task:string) : string {
+	let response = "";
+	if (regex_emptyline.test(task)) {
+		response = `${task}- [ ]`;
+	}
+	else {
+		response = task;
+	}
+	return response;
+}
+
+function cancel_handler(task:string) : string {
+	const now = moment().format();
+	let response = "";
+	if (regex_emptyline.test(task)) {
+		response = `${task}- [-]`;
+	}
+	else if (regex_todo.test(task)) {
+		const newTask = task.replace("- [ ]", "- [-]").replace("* [ ]", "* [-]");
+		response = `${newTask} @done(${now})`;
+	} 
+	else if (regex_not_todo.test(task)) {
+		response = `${task.replace(regex_task, "- [-] ").replace(regex_done, `@done(${now})`)}`;
+	}
+	else {
+		response = task;
 	}
 	return response;
 }
@@ -101,6 +145,16 @@ export function activate(context: vscode.ExtensionContext) {
 		'extension.TodoReschedule', 
 		replace_line_at_cursor(schedule_handler)
 	);
+	const disposable3 = vscode.commands.registerCommand(
+		'extension.TodoCreate', 
+		replace_line_at_cursor(create_handler)
+	);
+	const disposable4 = vscode.commands.registerCommand(
+		'extension.TodoMarkCanceled', 
+		replace_line_at_cursor(cancel_handler)
+	);
 	context.subscriptions.push(disposable1);
 	context.subscriptions.push(disposable2);
+	context.subscriptions.push(disposable3);
+	context.subscriptions.push(disposable4);
 }

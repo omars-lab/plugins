@@ -29,12 +29,30 @@
             {
                 "command": "extension.TodoReschedule",
                 "title": "Todo: Reschedule"
+            },
+            {
+                "command": "extension.TodoCreate",
+                "title": "Todo: Create New Todo"
+            },
+            {
+                "command": "extension.TodoMarkCanceled",
+                "title": "Todo: Cancel Todo"
             }
         ],
         "keybindings": [
             {
+                "command": "extension.TodoCreate",
+                "mac": "shift+cmd+l",
+                "when": "editorTextFocus"
+            },
+            {
                 "command": "extension.TodoMarkDone",
                 "mac": "shift+cmd+d",
+                "when": "editorTextFocus"
+            },
+            {
+                "command": "extension.TodoMarkCanceled",
+                "mac": "shift+cmd+r",
                 "when": "editorTextFocus"
             },
             {
@@ -53,11 +71,11 @@
     "devDependencies": {
         "@types/node": "^12.7.0",
         "@types/vscode": "^1.59.0",
-        "@typescript-eslint/eslint-plugin": "^4.16.0",
-        "@typescript-eslint/parser": "^4.16.0",
-        "eslint": "^7.21.0",
-        "typescript": "^4.3.5",
-        "vsce": "^1.96.3"
+        "@typescript-eslint/eslint-plugin": "^4.31.0",
+        "@typescript-eslint/parser": "^4.31.0",
+        "eslint": "^7.32.0",
+        "typescript": "^4.4.0",
+        "vsce": "^1.97.0"
     },
     "dependencies": {
         "moment": "^2.29.1"
