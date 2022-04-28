@@ -37,6 +37,10 @@
             {
                 "command": "extension.TodoMarkCanceled",
                 "title": "Todo: Cancel Todo"
+            },
+            {
+                "command": "extension.GetXCallbackURL",
+                "title": "XCallback: Copy URL to Clipboard"
             }
         ],
         "keybindings": [
@@ -58,6 +62,11 @@
             {
                 "command": "extension.TodoReschedule",
                 "mac": "shift+cmd+.",
+                "when": "editorTextFocus"
+            },
+            {
+                "command": "extension.GetXCallbackURL",
+                "mac": "shift+cmd+k",
                 "when": "editorTextFocus"
             }
         ]

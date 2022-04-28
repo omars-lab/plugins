@@ -30,6 +30,24 @@ function zeroPad(num:string, places:number):string {
 //     return a[2] + '-' + zeroPad(a[0], 2) + '-' + zeroPad(a[1], 2) + 'T' + zeroPad(a[4], 2) + ':' + zeroPad(a[5], 2) + ':' + zeroPad(a[6], 2) + "-" + zeroPad(String(offset), 2) + ":00";
 // }
 
+function copy_uri_to_clipboard() {
+	// Go from  ..
+	// 	file:///Users/omareid/Workspace/git/plugins/vscode/flavorfultasks/Makefile
+	// to ...
+	// 	vscode://file/Users/omareid/Workspace/git/plugins/vscode/flavorfultasks/Makefile
+
+	// Get the active text editor
+	// https://code.visualstudio.com/api/references/vscode-api#TextEditor
+	const editor = vscode.window.activeTextEditor;
+	if (editor) {
+		const document = editor.document;
+		const uri = document.uri.toString();
+		const suffix = `:${editor.selection.active.line}:${editor.selection.active.character}`;
+		const xcallback = uri.replace("file://", "vscode://file") + suffix;
+		vscode.env.clipboard.writeText(xcallback);
+	}
+}
+
 function replace_line_at_cursor(line_transformer : (a: string) => string) {
 	return function () {
 		// Get the active text editor
@@ -144,7 +162,7 @@ function cancel_handler(task:string) : string {
 		response = (
 			task
 				.replace(regex_task, "- [-]")
-				.replace(regex_done, `@done(${now})`)
+				.replace(regex_done, ` @done(${now})`)
 		);
 	}
 	else {
@@ -207,8 +225,15 @@ export function activate(context: vscode.ExtensionContext) {
 		'extension.TodoMarkCanceled', 
 		replace_line_at_cursor(cancel_handler)
 	);
+	const disposable5 = vscode.commands.registerCommand(
+		'extension.GetXCallbackURL', 
+		copy_uri_to_clipboard
+	);
+	
 	context.subscriptions.push(disposable1);
 	context.subscriptions.push(disposable2);
 	context.subscriptions.push(disposable3);
 	context.subscriptions.push(disposable4);
+	context.subscriptions.push(disposable5);
 }
+
